@@ -1,9 +1,10 @@
 defmodule Crush.VNode do
   @behaviour :riak_core_vnode
 
+  alias Crush.Store
   require Logger
-
   require Record
+
   Record.defrecord :fold_req_v2, :riak_core_fold_req_v2, Record.extract(:riak_core_fold_req_v2, from_lib: "riak_core/include/riak_core_vnode.hrl")
 
   def start_vnode(partition) do
@@ -11,8 +12,7 @@ defmodule Crush.VNode do
   end
 
   def init([partition]) do
-    table_name = :erlang.list_to_atom 'crush_' ++ :erlang.integer_to_list(partition)
-    table_id = :ets.new table_name, [:set, {:write_concurrency, false}, {:read_concurrency, false}]
+    {table_name, table_id} = Store.init [partition: partition]
     state = %{
       partition: partition,
       table_name: table_name,
@@ -31,25 +31,18 @@ defmodule Crush.VNode do
   end
 
   def handle_command({:get, k}, _sender, %{table_id: table_id, partition: partition} = state) do
-    res =
-      case :ets.lookup(table_id, k) do
-        [] ->
-          nil
-
-        [{_, value}] ->
-          value
-      end
-
+    res = Store.get table_id, k
     {:reply, {:ok, node(), partition, res}, state}
   end
 
   def handle_command({:del, k}, _sender, %{table_id: table_id, partition: partition} = state) do
-    :ets.delete table_id, k
-    {:reply, {:ok, node(), partition, nil}, state}
+    res = :ets.delete table_id, k
+    {:reply, {:ok, node(), partition, res}, state}
   end
 
   def handoff_starting(dest, %{partition: partition} = state) do
-    Logger.info "Starting handoff of #{partition} to: #{inspect dest}"
+    {_tupe, {_partition_id, node_name}} = dest
+    Logger.info "Starting handoff of #{partition} to: #{node_name}"
     {true, state}
   end
 
@@ -59,17 +52,19 @@ defmodule Crush.VNode do
   end
 
   def handoff_finished(dest, %{partition: partition} = state) do
-    Logger.info "Finished handoff of #{partition} to: #{inspect dest}"
+    {_partition_id, node_name} = dest
+    Logger.info "Finished handoff of #{partition} to: #{node_name}"
     {:ok, state}
   end
 
   def handle_handoff_command(fold_req_v2() = fold_req, _sender, %{partition: partition, table_id: table_id} = state) do
+    # These are shitty variable names but that's what they get called by riak_core...
     foldfun = fold_req_v2 fold_req, :foldfun
     acc0 = fold_req_v2 fold_req, :acc0
     out =
-      :ets.foldl(fn {k, v}, acc_in ->
+      Store.fold(table_id, acc0, fn {k, v}, acc_in ->
         foldfun.(k, v, acc_in)
-      end, acc0, table_id)
+      end)
 
     {:reply, out, state}
   end
@@ -79,8 +74,7 @@ defmodule Crush.VNode do
   end
 
   def is_empty(%{table_id: table_id} = state) do
-    empty? = :ets.first(table_id) == :"$end_of_table"
-    {empty?, state}
+    {Store.is_empty?(table_id), state}
   end
 
   def terminate(_reason, _state) do
@@ -88,18 +82,20 @@ defmodule Crush.VNode do
   end
 
   def delete(%{table_id: table_id} = state) do
-    :ets.delete table_id
+    Store.delete_table table_id
     {:ok, state}
   end
 
   def handle_handoff_data(data, %{table_id: table_id} = state) do
-    {k, v} = :erlang.binary_to_term data
-    :ets.insert table_id, {k, v}
+    data
+    |> Store.handoff_decode
+    |> Store.set_tuple(table_id)
+
     {:reply, :ok, state}
   end
 
   def encode_handoff_item(k, v) do
-    :erlang.term_to_binary {k, v}
+    Store.handoff_encode {k, v}
   end
 
   def handle_coverage(_req, _key_spaces, _sender, state) do

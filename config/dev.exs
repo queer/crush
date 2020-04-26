@@ -83,4 +83,6 @@ case System.get_env("RING") do
       web_port: 8299,
       handoff_ip: '127.0.0.1',
       schema_dirs: ['priv']
+
+  _ -> nil
 end

@@ -44,6 +44,7 @@ defmodule Crush.MixProject do
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
       {:uniendo, github: "marianoguerra/uniendo", branch: "master"},
+      {:diff, "~> 1.1"},
     ]
   end
 

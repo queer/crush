@@ -27,7 +27,6 @@ crush-*.tar
 # this depending on your deployment strategy.
 /priv/static/
 
-
 # riak_core directories
 /data*/
 /ring_data_dir*/
