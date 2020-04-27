@@ -7,6 +7,10 @@ defmodule CrushWeb.Router do
 
   scope "/api", CrushWeb do
     pipe_through :api
+
+    get    "/:key", KVController, :get
+    put    "/:key", KVController, :set
+    delete "/:key", KVController, :del
   end
 
   # Enables LiveDashboard only for development

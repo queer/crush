@@ -10,6 +10,7 @@ defmodule Crush.StoreTest do
 
   setup do
     {_table_name, table_id} = Store.init [partition: 0]
+
     %{table: table_id}
   end
 
