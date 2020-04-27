@@ -15,6 +15,6 @@ defmodule Crush do
   end
 
   def populate do
-    for i <- 1..100, do: Crush.Service.set("key_#{i}", i)
+    for i <- 1..100, do: Crush.Service.set("key_#{i}", %{"key_${i}" => i})
   end
 end

@@ -26,17 +26,17 @@ defmodule Crush.VNode do
   end
 
   def handle_command({:set, k, v}, _sender, %{table_id: table_id, partition: partition} = state) do
-    :ets.insert table_id, {k, v}
-    {:reply, {:ok, node(), partition, nil}, state}
+    Store.set table_id, k, v
+    {:reply, {:ok, node(), partition, v}, state}
   end
 
-  def handle_command({:get, k}, _sender, %{table_id: table_id, partition: partition} = state) do
-    res = Store.get table_id, k
+  def handle_command({:get, k, revisions}, _sender, %{table_id: table_id, partition: partition} = state) do
+    res = Store.get table_id, k, revisions
     {:reply, {:ok, node(), partition, res}, state}
   end
 
   def handle_command({:del, k}, _sender, %{table_id: table_id, partition: partition} = state) do
-    res = :ets.delete table_id, k
+    res = Store.del table_id, k
     {:reply, {:ok, node(), partition, res}, state}
   end
 

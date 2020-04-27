@@ -4,9 +4,9 @@ defmodule Crush.StoreTest do
   doctest Crush.Store
 
   @key "test"
-  @value_1 "test_1"
-  @value_2 "test_2"
-  @value_3 "test_3"
+  @value_1 %{"key" => "test_1"}
+  @value_2 %{"key" => "test_2"}
+  @value_3 %{"key" => "test_3"}
 
   setup do
     {_table_name, table_id} = Store.init [partition: 0]

@@ -59,18 +59,18 @@ defmodule Crush.Store do
     Enum.reduce patches, [], fn patch, revisions ->
       case revisions do
         [] ->
-          revision = Differ.patch value, patch, &Enum.join/1
+          revision = Differ.patch value, patch
           [revision]
 
         _ ->
           last_revision = Enum.at revisions, -1
-          revision = Differ.patch last_revision, patch, &Enum.join/1
+          revision = Differ.patch last_revision, patch
           revisions ++ [revision]
       end
     end
   end
 
-  def set(table_id, k, incoming_value) do
+  def set(table_id, k, incoming_value) when is_map(incoming_value) do
     case get(table_id, k, :all, false) do
       nil ->
         :ets.insert table_id, {k, {incoming_value, []}}

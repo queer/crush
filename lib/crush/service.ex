@@ -3,11 +3,11 @@ defmodule Crush.Service do
     run_command "ping#{v}", {:ping, v}
   end
 
-  def get(k) do
-    run_command k, {:get, k}
+  def get(k, revisions \\ 0) do
+    run_command k, {:get, k, revisions}
   end
 
-  def set(k, v) do
+  def set(k, v) when is_map(v) do
     run_command k, {:set, k, v}
   end
 
