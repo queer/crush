@@ -8,8 +8,6 @@ defmodule Crush.Application do
   def start(_type, _args) do
     children = [
       Crush.Supervisor,
-      # Start the Ecto repository
-      #Crush.Repo,
       # Start the Telemetry supervisor
       CrushWeb.Telemetry,
       # Start the PubSub system
