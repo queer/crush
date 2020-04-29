@@ -19,6 +19,11 @@ defmodule Crush.Service do
     idx = :riak_core_util.chash_key {"crush", hash_key}
     # TODO: Make this use more partitions for replication (configurable)
     [{index_node, _type}] = :riak_core_apl.get_primary_apl idx, 1, Crush.Service
-    :riak_core_vnode_master.sync_command index_node, command, Crush.VNode_master
+    :riak_core_vnode_master.sync_spawn_command index_node, command, Crush.VNode_master
+
+    # preflist = :riak_core_apl.get_apl idx, 1, Crush.Service
+    # request_id = :erlang.monotonic_time |> :erlang.phash2
+    # sender = {:raw, request_id, self()}
+    # :riak_core_vnode_master.command preflist, command, sender, Crush.VNode_master
   end
 end

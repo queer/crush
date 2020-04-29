@@ -40,7 +40,7 @@ defmodule Crush.MixProject do
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
-      {:uniendo, github: "marianoguerra/uniendo", branch: "master"},
+      {:riak_core_bootstrap, github: "queer/riak_core_bootstrap", branch: "master"},
       {:json_diff_ex, "~> 0.6.6"},
     ]
   end

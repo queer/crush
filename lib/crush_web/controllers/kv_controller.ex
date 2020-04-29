@@ -2,6 +2,8 @@ defmodule CrushWeb.KVController do
   use CrushWeb, :controller
   alias Crush.Service
 
+  # TODO: ALL of these need to just blocking await recv
+
   def get(conn, params) do
     revision_count =
       case params["revisions"] do

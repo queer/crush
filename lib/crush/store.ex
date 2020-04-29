@@ -74,6 +74,7 @@ defmodule Crush.Store do
     case get(table_id, k, :all, false) do
       nil ->
         :ets.insert table_id, {k, {incoming_value, []}}
+        incoming_value
 
       {value, patches} = fetched ->
         next_patch = Differ.diff incoming_value, value
@@ -87,6 +88,7 @@ defmodule Crush.Store do
         incoming_patches = Enum.take patches, patch_count
         final_patches = [next_patch | incoming_patches]
         :ets.insert table_id, {k, {incoming_value, final_patches}}
+        incoming_value
     end
   end
 

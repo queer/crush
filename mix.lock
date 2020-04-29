@@ -43,6 +43,7 @@
   "quickrand": {:hex, :quickrand, "1.8.0", "e47ce597ff067385ff5836c8c7706ac7f8aa7b47dd90c6417e05b64696f872fa", [:rebar3], [], "hexpm", "7ffadcf851fb4d1f7bc2952e955623be63f9c4a6b965fd207cc558d5aedbb6f9"},
   "ranch": {:hex, :ranch, "1.7.1", "6b1fab51b49196860b733a49c07604465a47bdb78aa10c1c16a3d199f7f8c881", [:rebar3], [], "hexpm", "451d8527787df716d99dc36162fca05934915db0b6141bbdac2ea8d3c7afc7d7"},
   "riak_core": {:git, "git://github.com/lasp-lang/riak_core", "ba4818aedef9cf961fe97d7357457266d9d0aab9", [branch: "partisan-support-r21"]},
+  "riak_core_bootstrap": {:git, "https://github.com/queer/riak_core_bootstrap.git", "495009001cc625c3671697fd1ab9380043182c72", [branch: "master"]},
   "riak_core_partisan_utils": {:git, "git://github.com/lasp-lang/riak_core_partisan_utils", "c1e4941a60796dcf754c7eb9df61fb17b1c5498e", [branch: "master"]},
   "riak_ensemble": {:git, "git://github.com/Kyorai/riak_ensemble", "439512412860a33c788aaa25bb07540564b84f77", [branch: "develop"]},
   "riak_sysmon": {:git, "https://github.com/Kyorai/riak_sysmon.git", "086930e5641b6a0b0ce659f115e35b1f84780ef2", [branch: "vsn_plugin_update"]},
