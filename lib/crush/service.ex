@@ -18,6 +18,8 @@ defmodule Crush.Service do
   defp run_command(hash_key, command) do
     idx = :riak_core_util.chash_key {"crush", hash_key}
     # TODO: Make this use more partitions for replication (configurable)
+    # TODO: WHY is this faster than the async :command/4?
+    # https://github.com/queer/crush/issues/5
     [{index_node, _type}] = :riak_core_apl.get_primary_apl idx, 1, Crush.Service
     :riak_core_vnode_master.sync_spawn_command index_node, command, Crush.VNode_master
 
