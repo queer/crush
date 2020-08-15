@@ -55,34 +55,3 @@ config :phoenix, :stacktrace_depth, 20
 
 # Initialize plugs at runtime for faster development compilation
 config :phoenix, :plug_init_mode, :runtime
-
-case System.get_env("RING") do
-  "0" ->
-    config :riak_core,
-      ring_state_dir: 'ring_data_dir_0',
-      platform_data_dir: 'data_0',
-      handoff_port: 8089,
-      web_port: 8099,
-      handoff_ip: '127.0.0.1',
-      schema_dirs: ['priv']
-
-  "1" ->
-    config :riak_core,
-      ring_state_dir: 'ring_data_dir_1',
-      platform_data_dir: 'data_1',
-      handoff_port: 8189,
-      web_port: 8199,
-      handoff_ip: '127.0.0.1',
-      schema_dirs: ['priv']
-
-  "2" ->
-    config :riak_core,
-      ring_state_dir: 'ring_data_dir_2',
-      platform_data_dir: 'data_2',
-      handoff_port: 8289,
-      web_port: 8299,
-      handoff_ip: '127.0.0.1',
-      schema_dirs: ['priv']
-
-  _ -> nil
-end

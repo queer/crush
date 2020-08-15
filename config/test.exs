@@ -20,17 +20,3 @@ config :crush, CrushWeb.Endpoint,
 
 # Print only warnings and errors during test
 config :logger, level: :warn
-
-config :riak_core,
-  ring_state_dir: 'ring_data_dir_test',
-  platform_data_dir: 'data_test',
-  handoff_port: 8989,
-  web_port: 8999,
-  handoff_ip: '127.0.0.1',
-  schema_dirs: ['priv']
-
-
-config :lager,
-  handlers: [
-    lager_console_backend: [level: :error]
-  ]

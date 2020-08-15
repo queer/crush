@@ -1,5 +1,6 @@
 defmodule CrushWeb.KVControllerTest do
   use CrushWeb.ConnCase
+  alias Crush.Store
   alias CrushWeb.KVController
   doctest CrushWeb.KVController
 
@@ -9,7 +10,8 @@ defmodule CrushWeb.KVControllerTest do
   @value_3 %{"test" => "test 3", "test-3" => "3rd test"}
 
   setup do
-    Crush.Service.del @key
+    Store.init nil
+    Store.del @key
     :ok
   end
 

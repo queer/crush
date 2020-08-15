@@ -6,8 +6,9 @@ defmodule Crush.Application do
   use Application
 
   def start(_type, _args) do
+    Crush.Store.init nil
+
     children = [
-      Crush.Supervisor,
       # Start the Telemetry supervisor
       CrushWeb.Telemetry,
       # Start the PubSub system
