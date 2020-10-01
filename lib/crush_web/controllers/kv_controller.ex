@@ -1,6 +1,6 @@
 defmodule CrushWeb.KVController do
   use CrushWeb, :controller
-  alias Crush.Service
+  alias Crush.Raft
 
   # TODO: ALL of these need to just blocking await recv
 
@@ -24,26 +24,25 @@ defmodule CrushWeb.KVController do
           end
       end
 
-    {:ok, _node, _partition, stored_value} = Service.get params["key"], revision_count
-    case stored_value do
-      {value, revisions} ->
+    case Raft.get(params["key"], revision_count) do
+      {:ok, {value, revisions}} ->
         conn
         |> json([value | revisions])
 
-      nil ->
+      {:ok, nil} ->
         conn
-        |> json([])
+        |> json(nil)
     end
   end
 
   def set(conn, params) do
-    {:ok, _node, _partition, value} = Service.set params["key"], conn.body_params
+    {:ok, value} = Raft.set params["key"], conn.body_params
     conn
     |> json(value)
   end
 
   def del(conn, params) do
-    {:ok, _node, _partition, true} = Service.del params["key"]
+    Raft.del params["key"]
     conn
     |> json(%{"deleted" => true})
   end

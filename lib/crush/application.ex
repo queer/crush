@@ -6,8 +6,11 @@ defmodule Crush.Application do
   use Application
 
   def start(_type, _args) do
+    Crush.Store.setup()
+    topologies = Application.get_env :libcluster, :topologies
     children = [
-      Crush.Supervisor,
+      {Cluster.Supervisor, [topologies, [name: Crush.ClusterSupervisor]]},
+      Crush.Raft,
       # Start the Telemetry supervisor
       CrushWeb.Telemetry,
       # Start the PubSub system

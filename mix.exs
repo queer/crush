@@ -20,7 +20,7 @@ defmodule Crush.MixProject do
   def application do
     [
       mod: {Crush.Application, []},
-      extra_applications: [:riak_core, :logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools]
     ]
   end
 
@@ -40,8 +40,10 @@ defmodule Crush.MixProject do
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
-      {:riak_core_bootstrap, github: "queer/riak_core_bootstrap", branch: "master"},
       {:json_diff_ex, "~> 0.6.6"},
+      {:rafted_value, "~> 0.11.1"},
+      {:raft_fleet, "~> 0.10.1"},
+      {:libcluster, "~> 3.2"},
     ]
   end
 
