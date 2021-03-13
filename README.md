@@ -1,18 +1,39 @@
-# Crush
+# crush
 
-To start your Phoenix server:
+A time-traveling, replicated, eventually-consistent key-value store.
 
-  * Install dependencies with `mix deps.get`
-  * Start Phoenix endpoint with `mix phx.server`
+## API
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+### `GET /:key`
 
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
+Returns the key and its revisions. The returned value looks like:
 
-## Learn more
+```Javascript
+[current_value, revisions]
+```
+where `revisions` is a possibly-empty list.
 
-  * Official website: https://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Forum: https://elixirforum.com/c/phoenix-forum
-  * Source: https://github.com/phoenixframework/phoenix
+If the key does not exist, an empty list is returned:
+
+```Javascript
+[]
+```
+
+#### Query parameters
+
+- `revisions`: The number of revisions to return. Set to `all` for all
+  revisions. If this value is not specified, or is not a number or the literal
+  string `"all"`, an empty list of revisions will be returned.
+- `patch`: Whether or not to apply patches. By default, the returned revisions
+  are a set of patches that can be used to revert to each previous state. If
+  `patch` is set to `true`, the patches will be applied, and the computed
+  values will be returned as the list of revisions. Defaults to `false`.
+
+### `PUT /:key`
+
+Sets the value at the given key. The request body is the value that is set.
+Returns the value that was set.
+
+### `DELETE /:key`
+
+Deletes the key from the store. Returns the literal string `"ok"`.

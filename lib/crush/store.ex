@@ -83,5 +83,6 @@ defmodule Crush.Store do
 
   def del(key) do
     Cluster.delete key
+    :ok
   end
 end
