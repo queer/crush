@@ -40,6 +40,7 @@ defmodule Crush.MixProject do
       {:plug_cowboy, "~> 2.0"},
       {:libcluster, "~> 3.2"},
       {:delta_crdt, "~> 0.5.10"},
+      {:differ, "~> 0.1.1"},
     ]
   end
 

@@ -22,7 +22,7 @@ defmodule Crush.Cluster do
     neighbours =
       Node.list()
       |> Enum.map(fn node ->
-        Task.Supervisor.async {CRUSH.Tasker, node}, fn ->
+        Task.Supervisor.async {Crush.Tasker, node}, fn ->
           __MODULE__.get_crdt()
         end
       end)

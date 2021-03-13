@@ -21,6 +21,7 @@ defmodule Crush.Application do
     Node.set_cookie Node.self(), cookie
 
     children = [
+      {Task.Supervisor, name: Crush.Tasker},
       Crush.Cluster,
       {Cluster.Supervisor, [topology, [name: Crush.ClusterSupervisor]]},
       CrushWeb.Telemetry,
