@@ -7,6 +7,7 @@ defmodule Crush.Store do
     field :patches, [binary()]
   end
 
+  @spec get(String.t(), :all | non_neg_integer(), boolean()) :: nil | Crush.Store.Item.t()
   def get(key, revisions \\ 0, patch? \\ true) do
     case Cluster.read(key) do
       nil -> nil
@@ -73,6 +74,7 @@ defmodule Crush.Store do
     end
   end
 
+  @spec set(String.t(), binary()) :: binary()
   def set(key, incoming_value) do
     case get(key, :all, false) do
       nil ->
@@ -89,6 +91,7 @@ defmodule Crush.Store do
     end
   end
 
+  @spec del(String.t()) :: :ok
   def del(key) do
     Cluster.delete key
     :ok
