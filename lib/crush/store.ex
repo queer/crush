@@ -14,21 +14,48 @@ defmodule Crush.Store do
     end
   end
 
-  defp extract_value_with_revisions(%Item{value: value, patches: []}, _, _), do: {value, []}
-  defp extract_value_with_revisions(%Item{value: value, patches: _}, 0, _), do: {value, []}
+  defp extract_value_with_revisions(%Item{value: value, patches: []}, _, _) do
+    %Item{
+      value: value,
+      patches: [],
+    }
+  end
+
+  defp extract_value_with_revisions(%Item{value: value, patches: _}, 0, _) do
+    %Item{
+      value: value,
+      patches: [],
+    }
+  end
+
   defp extract_value_with_revisions(%Item{value: value, patches: patches}, :all, true) do
-    {value, reduce_revisions(value, patches)}
+    %Item{
+      value: value,
+      patches: reduce_revisions(value, patches),
+    }
   end
+
   defp extract_value_with_revisions(%Item{value: value, patches: patches}, :all, false) do
-    {value, patches}
+    %Item{
+      value: value,
+      patches: patches,
+    }
   end
+
   defp extract_value_with_revisions(%Item{value: value, patches: patches}, revs, true) do
     requested_patches = Enum.take patches, revs
-        {value, reduce_revisions(value, requested_patches)}
+    %Item{
+      value: value,
+      patches: reduce_revisions(value, requested_patches),
+    }
   end
+
   defp extract_value_with_revisions(%Item{value: value, patches: patches}, revs, false) do
     requested_patches = Enum.take patches, revs
-    {value, requested_patches}
+    %Item{
+      value: value,
+      patches: requested_patches,
+    }
   end
 
   defp reduce_revisions(value, patches) do
@@ -52,7 +79,7 @@ defmodule Crush.Store do
         Cluster.write key, %Item{value: incoming_value, patches: []}
         incoming_value
 
-      {value, patches} ->
+      %Item{value: value, patches: patches} ->
         # Diff required to move from stored value to incoming value
         next_patch = Differ.diff incoming_value, value
 

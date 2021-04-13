@@ -5,6 +5,6 @@ defmodule Crush.Differ do
 
   def patch(curr, patch) do
     {:ok, patched} = Differ.patch curr, patch
-    patched |> IO.inspect(label: "patched")
+    patched
   end
 end

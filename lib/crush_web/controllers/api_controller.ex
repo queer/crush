@@ -1,6 +1,7 @@
 defmodule CrushWeb.ApiController do
   use CrushWeb, :controller
   alias Crush.Store
+  alias Crush.Store.Item
 
   def get(conn, %{"key" => key} = params) do
     rev_count =
@@ -17,15 +18,15 @@ defmodule CrushWeb.ApiController do
     patch? = params["patch"] == "true"
 
     case Store.get(key, rev_count, patch?) do
-      {value, revisions} ->
-        json conn, [value | revisions_to_json(revisions)]
+      %Item{value: value, patches: patches} ->
+        json conn, [value | patches_to_json(patches)]
 
       nil -> json conn, []
     end
   end
 
-  defp revisions_to_json(revisions) do
-    Enum.map revisions, fn
+  defp patches_to_json(patches) do
+    Enum.map patches, fn
       rev when is_list(rev) ->
         Enum.map rev, fn
           part when is_tuple(part) -> Tuple.to_list part
@@ -39,9 +40,7 @@ defmodule CrushWeb.ApiController do
   def key_info(conn, %{"key" => key}) do
     revision_count =
       case Store.get(key, :all, false) do
-        {_, revisions} ->
-          length(revisions)
-
+        %Item{value: _,  patches: patches} -> length(patches)
         nil -> 0
       end
 
