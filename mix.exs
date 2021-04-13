@@ -41,6 +41,7 @@ defmodule Crush.MixProject do
       {:libcluster, "~> 3.2"},
       {:delta_crdt, "~> 0.5.10"},
       {:differ, "~> 0.1.1"},
+      {:typed_struct, "~> 0.2.1"},
     ]
   end
 

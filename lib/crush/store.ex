@@ -1,5 +1,20 @@
 defmodule Crush.Store do
+  @moduledoc """
+  Crush's data store.
+
+  Data is currently stored in a DeltaCRDT AWLWWMap. Data is stored in the map
+  as a tuple `{current_value, patches}`, where the current value is any binary,
+  and the patches are a list of diff operations required to transform said
+  binary into its previous state.
+  """
+
+  use TypedStruct
   alias Crush.{Cluster, Differ}
+
+  typedstruct module: Item do
+    field :value, binary()
+    field :patches, [binary()]
+  end
 
   def get(key, revisions \\ 0, patch? \\ true) do
     case Cluster.read(key) do
@@ -8,34 +23,21 @@ defmodule Crush.Store do
     end
   end
 
-  defp extract_value_with_revisions(value, revision_count, patch?) do
-    case value do
-      {value, []} ->
-        # Value-only, return no revs
-        {value, []}
-
-      {value, _} when revision_count == 0 ->
-        # No revs wanted
-        {value, []}
-
-      {value, patches} when is_list(patches) and length(patches) > 0 ->
-        # Have patches, return as many as needed, patching as needed
-        cond do
-          patch? and revision_count == :all ->
-            {value, reduce_revisions(value, patches)}
-
-          not patch? and revision_count == :all ->
-            {value, patches}
-
-          patch? and revision_count != :all ->
-            requested_patches = Enum.take patches, revision_count
-            {value, reduce_revisions(value, requested_patches)}
-
-          not patch? and revision_count != :all ->
-            requested_patches = Enum.take patches, revision_count
-            {value, requested_patches}
-        end
-    end
+  defp extract_value_with_revisions(%Item{value: value, patches: []}, _, _), do: {value, []}
+  defp extract_value_with_revisions(%Item{value: value, patches: _}, 0, _), do: {value, []}
+  defp extract_value_with_revisions(%Item{value: value, patches: patches}, :all, true) do
+    {value, reduce_revisions(value, patches)}
+  end
+  defp extract_value_with_revisions(%Item{value: value, patches: patches}, :all, false) do
+    {value, patches}
+  end
+  defp extract_value_with_revisions(%Item{value: value, patches: patches}, revs, true) do
+    requested_patches = Enum.take patches, revs
+        {value, reduce_revisions(value, requested_patches)}
+  end
+  defp extract_value_with_revisions(%Item{value: value, patches: patches}, revs, false) do
+    requested_patches = Enum.take patches, revs
+    {value, requested_patches}
   end
 
   defp reduce_revisions(value, patches) do
