@@ -11,7 +11,7 @@ defmodule CrushWeb.ApiControllerTest do
     %{conn: build_conn()}
 
     on_exit fn ->
-      :ok == Store.del @key
+      :ok == Store.del Store.default_fork(), @key
     end
   end
 

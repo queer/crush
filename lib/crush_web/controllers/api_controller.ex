@@ -17,7 +17,7 @@ defmodule CrushWeb.ApiController do
 
     patch? = params["patch"] == "true"
 
-    case Store.get(key, rev_count, patch?) do
+    case Store.get(Store.default_fork(), key, rev_count, patch?) do
       %Item{value: value, patches: patches} ->
         json conn, [value | patches_to_json(patches)]
 
@@ -39,7 +39,7 @@ defmodule CrushWeb.ApiController do
 
   def key_info(conn, %{"key" => key}) do
     revision_count =
-      case Store.get(key, :all, false) do
+      case Store.get(Store.default_fork(), key, :all, false) do
         %Item{value: _,  patches: patches} -> length(patches)
         nil -> 0
       end
@@ -54,10 +54,10 @@ defmodule CrushWeb.ApiController do
 
   def set(conn, %{"key" => key}) do
     body = conn.assigns.raw_body
-    json conn, Store.set(key, body)
+    json conn, Store.set(Store.default_fork(), key, body)
   end
 
   def del(conn, %{"key" => key}) do
-    json conn, Store.del(key)
+    json conn, Store.del(Store.default_fork(), key)
   end
 end
