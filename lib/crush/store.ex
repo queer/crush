@@ -1,13 +1,4 @@
 defmodule Crush.Store do
-  @moduledoc """
-  Crush's data store.
-
-  Data is currently stored in a DeltaCRDT AWLWWMap. Data is stored in the map
-  as a tuple `{current_value, patches}`, where the current value is any binary,
-  and the patches are a list of diff operations required to transform said
-  binary into its previous state.
-  """
-
   use TypedStruct
   alias Crush.{Cluster, Differ}
 
@@ -58,7 +49,7 @@ defmodule Crush.Store do
   def set(key, incoming_value) do
     case get(key, :all, false) do
       nil ->
-        Cluster.write key, {incoming_value, []}
+        Cluster.write key, %Item{value: incoming_value, patches: []}
         incoming_value
 
       {value, patches} ->
@@ -66,7 +57,7 @@ defmodule Crush.Store do
         next_patch = Differ.diff incoming_value, value
 
         # Write all patches and new value
-        Cluster.write key, {incoming_value, [next_patch | patches]}
+        Cluster.write key, %Item{value: incoming_value, patches: [next_patch | patches]}
         incoming_value
     end
   end
