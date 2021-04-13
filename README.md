@@ -29,6 +29,15 @@ If the key does not exist, an empty list is returned:
   `patch` is set to `true`, the patches will be applied, and the computed
   values will be returned as the list of revisions. Defaults to `false`.
 
+### `GET /:key/info`
+
+Returns info about the given key.
+
+```js
+// ▶  curl localhost:7654/test/info
+{"key":"test","revision_count":11}
+```
+
 ### `PUT /:key`
 
 Sets the value at the given key. The request body is the value that is set.
