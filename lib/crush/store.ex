@@ -1,8 +1,6 @@
 defmodule Crush.Store do
   alias Crush.{Cluster, Differ}
 
-  @max_revisions 8
-
   def get(key, revisions \\ 0, patch? \\ true) do
     case Cluster.read(key) do
       nil -> nil
@@ -65,18 +63,8 @@ defmodule Crush.Store do
         # Diff required to move from stored value to incoming value
         next_patch = Differ.diff incoming_value, value
 
-        # Take the maximum number of patches we can
-        patch_count = length patches
-        patch_count =
-          if patch_count == @max_revisions do
-            patch_count - 1
-          else
-            patch_count
-          end
-
-        # Write patches and new value
-        incoming_patches = Enum.take patches, patch_count
-        Cluster.write key, {incoming_value, [next_patch | incoming_patches]}
+        # Write all patches and new value
+        Cluster.write key, {incoming_value, [next_patch | patches]}
         incoming_value
     end
   end

@@ -18,8 +18,8 @@ defmodule CrushWeb.ApiController do
 
     case Store.get(key, rev_count, patch?) do
       {value, revisions} ->
-        IO.inspect [value | revisions_to_json(revisions)], label: "out"
         json conn, [value | revisions_to_json(revisions)]
+
       nil -> json conn, []
     end
   end
@@ -34,6 +34,23 @@ defmodule CrushWeb.ApiController do
 
       rev -> rev
     end
+  end
+
+  def key_info(conn, %{"key" => key}) do
+    revision_count =
+      case Store.get(key, :all, false) do
+        {_, revisions} ->
+          length(revisions)
+
+        nil -> 0
+      end
+
+    info = %{
+      key: key,
+      revision_count: revision_count,
+    }
+
+    json conn, info
   end
 
   def set(conn, %{"key" => key}) do
