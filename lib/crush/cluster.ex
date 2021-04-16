@@ -33,6 +33,7 @@ defmodule Crush.Cluster do
     {:noreply, crdt}
   end
 
+  @spec get_crdt :: pid()
   def get_crdt do
     :ok = spin_on_table()
     [{:crdt, crdt}] = :ets.lookup @table, :crdt
@@ -50,14 +51,17 @@ defmodule Crush.Cluster do
     end
   end
 
+  @spec write(String.t(), any()) :: :ok
   def write(k, v) do
     DeltaCrdt.mutate get_crdt(), :add, [k, v]
   end
 
+  @spec read(String.t()) :: any()
   def read(k) do
     get_crdt() |> DeltaCrdt.read |> Map.get(k)
   end
 
+  @spec delete(String.t()) :: :ok
   def delete(k) do
     DeltaCrdt.mutate get_crdt(), :remove, [k]
   end

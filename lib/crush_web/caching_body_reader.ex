@@ -5,7 +5,6 @@ defmodule CrushWeb.CachingBodyReader do
   def read_body(conn, opts) do
     {:ok, body, conn} = read_full_body conn, opts
     conn = update_in conn.assigns[:raw_body], fn _ -> body end
-    IO.puts "updated body: #{conn.assigns.raw_body}"
     {:ok, body, conn}
   end
 

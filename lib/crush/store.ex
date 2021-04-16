@@ -8,7 +8,13 @@ defmodule Crush.Store do
     field :value, binary()
     field :patches, [binary()]
     field :fork, String.t(), default: "default"
-    field :ancestors, [String.t()], default: []
+    field :ancestors, [Ancestor.t()], default: []
+    field :rev, non_neg_integer(), default: 0
+  end
+
+  typedstruct module: Ancestor do
+    field :fork, String.t()
+    field :rev, non_neg_integer()
   end
 
   @spec get(String.t(), String.t(), :all | non_neg_integer(), boolean()) :: nil | Crush.Store.Item.t()
@@ -64,17 +70,58 @@ defmodule Crush.Store do
   def set(fork, key, incoming_value) do
     case get(fork, key, :all, false) do
       nil ->
-        Cluster.write to_key(fork, key), %Item{value: incoming_value, patches: []}
+        :ok = Cluster.write to_key(fork, key), %Item{value: incoming_value, patches: []}
         incoming_value
 
-      %Item{value: value, patches: patches} ->
+      %Item{value: value, patches: patches, rev: rev} = item ->
         # Diff required to move from stored value to incoming value
         next_patch = Differ.diff incoming_value, value
 
         # Write all patches and new value
-        Cluster.write to_key(fork, key), %Item{value: incoming_value, patches: [next_patch | patches]}
+        :ok = Cluster.write to_key(fork, key), %{
+            item
+            | value: incoming_value,
+              patches: [next_patch | patches],
+              rev: rev + 1,
+          }
+
         incoming_value
     end
+  end
+
+  @spec fork(String.t(), String.t(), __MODULE__.Item.t()) :: :ok
+  def fork(key, target, %Item{fork: fork, ancestors: ancestors, rev: rev} = item) do
+    # Move the item to the target fork, and prepend previous fork to ancestors
+    new_item = %{item | fork: target, ancestors: [%Ancestor{fork: fork, rev: rev} | ancestors]}
+    Cluster.write to_key(target, key), new_item
+  end
+
+  @spec merge(String.t(), String.t(), String.t()) :: :ok
+  def merge(key, source_fork, target_fork) do
+    %Item{
+      value: source_value,
+      fork: source_fork,
+      rev: source_rev,
+    } = get source_fork, key, :all, false
+
+    %Item{
+      value: target_value,
+      fork: ^target_fork,
+      patches: patches,
+      ancestors: ancestors,
+      rev: target_rev,
+    } = target = get target_fork, key, :all, false
+
+    next_patch = Differ.diff source_value, target_value
+    merged_item = %{
+      target
+      | value: source_value,
+        patches: [next_patch | patches],
+        ancestors: [%Ancestor{fork: source_fork, rev: source_rev} | ancestors],
+        rev: target_rev + 1,
+    }
+
+    Cluster.write to_key(target_fork, key), merged_item
   end
 
   @spec del(String.t(), String.t()) :: :ok
@@ -85,5 +132,6 @@ defmodule Crush.Store do
 
   defp to_key(fork, key), do: fork <> ":" <> key
 
+  @spec default_fork() :: String.t()
   def default_fork, do: @default_fork
 end

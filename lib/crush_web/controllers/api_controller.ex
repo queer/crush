@@ -4,6 +4,7 @@ defmodule CrushWeb.ApiController do
   alias Crush.Store.Item
 
   def get(conn, %{"key" => key} = params) do
+    fork = params["fork"] || Store.default_fork()
     rev_count =
       case params["revisions"] do
         "all" -> :all
@@ -17,14 +18,15 @@ defmodule CrushWeb.ApiController do
 
     patch? = params["patch"] == "true"
 
-    case Store.get(Store.default_fork(), key, rev_count, patch?) do
+    case Store.get(fork, key, rev_count, patch?) do
       %Item{value: value, patches: patches} ->
-        json conn, [value | patches_to_json(patches)]
+        json conn, [value, patches_to_json(patches)]
 
       nil -> json conn, []
     end
   end
 
+  defp patches_to_json([]), do: []
   defp patches_to_json(patches) do
     Enum.map patches, fn
       rev when is_list(rev) ->
@@ -37,9 +39,22 @@ defmodule CrushWeb.ApiController do
     end
   end
 
-  def key_info(conn, %{"key" => key}) do
+  def set(conn, %{"key" => key} = params) do
+    fork = params["fork"] || Store.default_fork()
+    body = conn.assigns.raw_body
+    json conn, Store.set(fork, key, body)
+  end
+
+  def del(conn, %{"key" => key} = params) do
+    fork = params["fork"] || Store.default_fork()
+    :ok = Store.del(fork, key)
+    json conn, %{status: :ok}
+  end
+
+  def key_info(conn, %{"key" => key} = params) do
+    fork = params["fork"] || Store.default_fork()
     revision_count =
-      case Store.get(Store.default_fork(), key, :all, false) do
+      case Store.get(fork, key, :all, false) do
         %Item{value: _,  patches: patches} -> length(patches)
         nil -> 0
       end
@@ -52,12 +67,50 @@ defmodule CrushWeb.ApiController do
     json conn, info
   end
 
-  def set(conn, %{"key" => key}) do
-    body = conn.assigns.raw_body
-    json conn, Store.set(Store.default_fork(), key, body)
+  def fork(conn, %{"key" => key, "fork" => fork, "target" => target}) do
+    item =
+      case Store.get(fork, key, :all, false) do
+        %Item{} = item -> item
+        _ -> nil
+      end
+
+    if item do
+      :ok = Store.fork key, target, item
+      json conn, %{status: :ok}
+    else
+      conn
+      |> put_status(:not_found)
+      |> json(%{status: :error, error: :not_found})
+    end
   end
 
-  def del(conn, %{"key" => key}) do
-    json conn, Store.del(Store.default_fork(), key)
+  def merge(conn, %{"key" => key, "fork" => fork, "target" => target}) do
+    source? =
+      case Store.get(fork, key, 0, false) do
+        %Item{} -> true
+        _ -> false
+      end
+
+    target? =
+      case Store.get(target, key, :all, false) do
+        %Item{} -> true
+        _ -> false
+      end
+
+    cond do
+      not source? ->
+        conn
+        |> put_status(404)
+        |> json(%{status: :error, error: :source_not_found})
+
+      not target? ->
+        conn
+        |> put_status(404)
+        |> json(%{status: :error, error: :target_not_found})
+
+      true ->
+        :ok = Store.merge key, fork, target
+        json conn, %{status: :ok}
+    end
   end
 end

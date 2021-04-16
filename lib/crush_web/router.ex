@@ -7,9 +7,16 @@ defmodule CrushWeb.Router do
 
   scope "/", CrushWeb do
     pipe_through :api
-    get    "/:key",      ApiController, :get
-    get    "/:key/info", ApiController, :key_info
-    put    "/:key",      ApiController, :set
-    delete "/:key",      ApiController, :del
+    get    "/:key",                     ApiController, :get
+    put    "/:key",                     ApiController, :set
+    delete "/:key",                     ApiController, :del
+    get    "/:key/:fork",               ApiController, :get
+    put    "/:key/:fork",               ApiController, :set
+    delete "/:key/:fork",               ApiController, :del
+
+    get    "/:key/info",                ApiController, :key_info
+    get    "/:key/:fork/info",          ApiController, :key_info
+    post   "/:key/:fork/fork/:target",  ApiController, :fork
+    post   "/:key/:fork/merge/:target", ApiController, :merge
   end
 end
