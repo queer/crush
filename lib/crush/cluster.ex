@@ -65,4 +65,9 @@ defmodule Crush.Cluster do
   def delete(k) do
     DeltaCrdt.mutate get_crdt(), :remove, [k]
   end
+
+  @spec keys() :: [binary()]
+  def keys do
+    get_crdt() |> DeltaCrdt.read |> Map.keys
+  end
 end

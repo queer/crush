@@ -7,6 +7,7 @@ defmodule CrushWeb.Router do
 
   scope "/", CrushWeb do
     pipe_through :api
+    get    "/keys",                     ApiController, :keys
     get    "/:key",                     ApiController, :get
     put    "/:key",                     ApiController, :set
     delete "/:key",                     ApiController, :del

@@ -1,6 +1,6 @@
 defmodule CrushWeb.ApiController do
   use CrushWeb, :controller
-  alias Crush.Store
+  alias Crush.{Cluster, Store}
   alias Crush.Store.Item
 
   def get(conn, %{"key" => key} = params) do
@@ -42,7 +42,8 @@ defmodule CrushWeb.ApiController do
   def set(conn, %{"key" => key} = params) do
     fork = params["fork"] || Store.default_fork()
     body = conn.assigns.raw_body
-    json conn, Store.set(fork, key, body)
+    Store.set(fork, key, body)
+    json conn, %{status: :ok}
   end
 
   def del(conn, %{"key" => key} = params) do
@@ -112,5 +113,19 @@ defmodule CrushWeb.ApiController do
         :ok = Store.merge key, fork, target
         json conn, %{status: :ok}
     end
+  end
+
+  def keys(conn, %{"prefix" => prefix} = params) do
+    prefix = (params["fork"] || Store.default_fork()) <> ":" <> prefix
+    keys =
+      Enum.filter(Cluster.keys(), fn key ->
+        String.starts_with? key, prefix
+      end)
+
+    json conn, keys
+  end
+
+  def keys(conn, _) do
+    json conn, Cluster.keys()
   end
 end
