@@ -20,21 +20,20 @@ defmodule CrushWeb.ApiController do
 
     case Store.get(fork, key, rev_count, patch?) do
       %Item{value: value, patches: patches} ->
-        json conn, [value, patches_to_json(patches)]
+        json conn, [value_to_json(value), patches_to_json(patches)]
 
       nil -> json conn, []
     end
   end
 
+  defp value_to_json(part) when is_tuple(part), do: part |> Tuple.to_list |> Enum.map(&:erlang.binary_to_list/1)
+  defp value_to_json(part) when is_list(part), do: Enum.map part, &:erlang.binary_to_list/1
+  defp value_to_json(part) when is_binary(part), do: :erlang.binary_to_list part
+
   defp patches_to_json([]), do: []
   defp patches_to_json(patches) do
     Enum.map patches, fn
-      rev when is_list(rev) ->
-        Enum.map rev, fn
-          part when is_tuple(part) -> Tuple.to_list part
-          part -> part
-        end
-
+      rev when is_list(rev) -> Enum.map rev, &value_to_json/1
       rev -> rev
     end
   end
