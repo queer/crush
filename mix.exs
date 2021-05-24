@@ -38,7 +38,7 @@ defmodule Crush.MixProject do
       {:telemetry_poller, "~> 0.4"},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
-      {:libcluster, "~> 3.2"},
+      {:libcluster, github: "svrdlans/libcluster", ref: "6f57e1f"},
       {:delta_crdt, "~> 0.5.10"},
       {:differ, "~> 0.1.1"},
       {:typed_struct, "~> 0.2.1"},
