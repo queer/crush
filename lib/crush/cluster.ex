@@ -11,7 +11,7 @@ defmodule Crush.Cluster do
   def init(_) do
     :net_kernel.monitor_nodes true
     Logger.debug "[CRUSH] [CLUSTER] boot: node: monitor up"
-    {:ok, crdt} = DeltaCrdt.start_link(DeltaCrdt.AWLWWMap)
+    {:ok, crdt} = DeltaCrdt.start_link DeltaCrdt.AWLWWMap, storage_module: Crush.Persister
     :ets.new @table, [:named_table, :public, :set, read_concurrency: true]
     :ets.insert @table, {:crdt, crdt}
     {:ok, crdt}

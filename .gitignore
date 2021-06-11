@@ -9,3 +9,4 @@ crush-*.tar
 /priv/static/
 /assets/node_modules
 /*.sh
+/*@*
