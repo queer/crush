@@ -43,7 +43,7 @@ defmodule CrushWeb.ApiControllerTest do
       |> get(Routes.api_path(conn, :get, @key))
       |> json_response(200)
 
-    assert [:erlang.binary_to_list(@value), []] == res
+    assert [Base.encode64(@value), []] == res
   end
 
   test "that forking a key works", %{conn: conn} do
@@ -91,6 +91,6 @@ defmodule CrushWeb.ApiControllerTest do
       |> get(Routes.api_path(conn, :get, @key), revisions: "all")
       |> json_response(200)
 
-    assert ['value 2', [[["eq", 'value'], ["del", ' 2']]]] == res
+    assert [Base.encode64(@value_2), [[["eq", Base.encode64(@value)], ["del", Base.encode64(" 2")]]]] == res
   end
 end

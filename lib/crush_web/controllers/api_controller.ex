@@ -30,19 +30,19 @@ defmodule CrushWeb.ApiController do
     part
     |> Tuple.to_list
     |> Enum.map(fn
-      x when is_binary(x) -> :erlang.binary_to_list x
+      x when is_binary(x) -> Base.encode64 x
       x when is_atom(x) -> Atom.to_string x
       x -> value_to_json x
     end)
   end
   defp value_to_json(part) when is_list(part) do
     Enum.map part, fn
-      x when is_binary(x) -> :erlang.binary_to_list x
+      x when is_binary(x) -> Base.encode64 x
       x when is_atom(x) -> Atom.to_string x
       x -> value_to_json x
     end
   end
-  defp value_to_json(part) when is_binary(part), do: :erlang.binary_to_list part
+  defp value_to_json(part) when is_binary(part), do: Base.encode64 part
   defp value_to_json(part), do: part
 
   defp patches_to_json([]), do: []
