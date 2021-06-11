@@ -1,4 +1,5 @@
 name: Elixir tests
+on: [push]
 
 jobs:
   test:
