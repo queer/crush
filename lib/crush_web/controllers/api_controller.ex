@@ -43,13 +43,11 @@ defmodule CrushWeb.ApiController do
     end
   end
   defp value_to_json(part) when is_binary(part), do: :erlang.binary_to_list part
+  defp value_to_json(part), do: part
 
   defp patches_to_json([]), do: []
   defp patches_to_json(patches) do
-    Enum.map patches, fn
-      rev when is_list(rev) -> Enum.map rev, &value_to_json/1
-      rev -> rev
-    end
+    Enum.map patches, &value_to_json/1
   end
 
   def set(conn, %{"key" => key} = params) do

@@ -16,7 +16,13 @@ defmodule CrushWeb.CachingBodyReader do
 
   def read_body(conn, opts) do
     {:ok, body, conn} = read_full_body conn, opts
-    assigns = Map.put conn.assigns, :raw_body, body
+    assigns =
+      if conn.assigns[:raw_body] != nil and conn.assigns[:raw_body] != "" do
+        conn.assigns
+      else
+        Map.put conn.assigns, :raw_body, body
+      end
+
     conn = %{conn | assigns: assigns}
     {:ok, body, conn}
   end
